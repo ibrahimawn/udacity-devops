@@ -50,7 +50,7 @@ Resources:
       Roles:
         - !Ref UdacityS3ReadOnlyEC2
 
-  AppServerSecurityGroup:
+  WebServerSecurityGroup:
     Type: AWS::EC2::SecurityGroup
     Properties:
       GroupDescription: Allow only http to our hosts
@@ -88,5 +88,4 @@ Resources:
           Ebs:
             VolumeSize: !Ref VolumeSize
       SecurityGroups:
-        - !Ref AppServerSecurityGroup
-
+        - !Ref WebServerSecurityGroup
