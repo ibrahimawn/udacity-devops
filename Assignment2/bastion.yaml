@@ -60,3 +60,9 @@ Outputs:
     Value: !GetAtt Bastion.PublicIp
     Export:
       Name: !Sub ${EnvironmentName}-BASTION-IP
+
+  SecurityGroupID:
+    Description: Bastion Security Group ID
+    Value: !Ref BastionSecurityGroup
+    Export:
+      Name: !Sub ${EnvironmentName}-BASTION-SG
