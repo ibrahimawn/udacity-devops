@@ -98,7 +98,6 @@ Resources:
   LaunchConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
-      LaunchConfigurationName: !Sub ${EnvironmentName}-Launch-Config
       ImageId: !Ref AmiImageId
       InstanceType: !Ref InstanceType
       IamInstanceProfile: !Ref ProfileWithRolesForApp
