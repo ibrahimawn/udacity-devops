@@ -89,7 +89,11 @@ Resources:
           FromPort: 80
           ToPort: 80
           SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
-      # TODO: Allow SSH from bastion
+        - IpProtocol: tcp
+          FromPort: 22
+          ToPort: 22
+          SourceSecurityGroupId:
+            Fn::ImportValue: !Sub ${EnvironmentName}-BASTION-SG
       SecurityGroupEgress:
         - IpProtocol: tcp
           FromPort: 0
@@ -102,6 +106,7 @@ Resources:
       ImageId: !Ref AmiImageId
       InstanceType: !Ref InstanceType
       IamInstanceProfile: !Ref ProfileWithRolesForApp
+      KeyName: bastion-key
       UserData:
         Fn::Base64: !Sub |
           #!/bin/bash
