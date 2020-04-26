@@ -14,5 +14,13 @@
   {
     "ParameterKey": "VolumeSize",
     "ParameterValue": "10"
+  },
+  {
+    "ParameterKey": "AutoScalingMinSize",
+    "ParameterValue": "1"
+  },
+  {
+    "ParameterKey": "AutoScalingMaxSize",
+    "ParameterValue": "2"
   }
 ]

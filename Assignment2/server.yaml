@@ -25,8 +25,45 @@ Parameters:
     Type: Number
     Default: 10
 
+  AutoScalingMinSize:
+    Description: The minimum size of the Auto Scaling group.
+    Type: String
+    Default: 1
+
+  AutoScalingMaxSize:
+    Description: The maximum size of the Auto Scaling group.
+    Type: String
+    Default: 2
+
 
 Resources:
+
+  LoadBalancerSecurityGroup:
+    Type: AWS::EC2::SecurityGroup
+    Properties:
+      GroupDescription: Allow http to our loadbalancer
+      VpcId:
+        Fn::ImportValue: !Sub ${EnvironmentName}-VPCID
+      SecurityGroupIngress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+      SecurityGroupEgress:
+        - IpProtocol: tcp
+          FromPort: 80
+          ToPort: 80
+          CidrIp: 0.0.0.0/0
+
+  WebServerLoadBalancer:
+    Type: AWS::ElasticLoadBalancingV2::LoadBalancer
+    Properties:
+      Name: !Sub ${EnvironmentName}-LB
+      Subnets:
+        - Fn::ImportValue: !Sub ${EnvironmentName}-PUB1-SN
+        - Fn::ImportValue: !Sub ${EnvironmentName}-PUB2-SN
+      SecurityGroups:
+        - !Ref LoadBalancerSecurityGroup
 
   UdacityS3ReadOnlyEC2:
     Type: AWS::IAM::Role
@@ -60,7 +97,8 @@ Resources:
         - IpProtocol: tcp
           FromPort: 80
           ToPort: 80
-          CidrIp: 0.0.0.0/0 #TODO: Check with VPC cidr
+          SourceSecurityGroupId: !Ref LoadBalancerSecurityGroup
+      # TODO: Allow SSH from bastion
       SecurityGroupEgress:
         - IpProtocol: tcp
           FromPort: 0
@@ -70,6 +108,7 @@ Resources:
   LaunchConfig:
     Type: AWS::AutoScaling::LaunchConfiguration
     Properties:
+      LaunchConfigurationName: !Sub ${EnvironmentName}-Launch-Config
       ImageId: !Ref AmiImageId
       InstanceType: !Ref InstanceType
       IamInstanceProfile: !Ref ProfileWithRolesForApp
@@ -89,3 +128,13 @@ Resources:
             VolumeSize: !Ref VolumeSize
       SecurityGroups:
         - !Ref WebServerSecurityGroup
+
+  WebServerAutoScalingGroup:
+    Type: AWS::AutoScaling::AutoScalingGroup
+    Properties:
+      VPCZoneIdentifier:
+        - Fn::ImportValue:
+            !Sub ${EnvironmentName}-PRIV-NETS
+      LaunchConfigurationName: !Ref LaunchConfig
+      MinSize: !Ref AutoScalingMinSize
+      MaxSize: !Ref AutoScalingMaxSize
