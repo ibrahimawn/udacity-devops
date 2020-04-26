@@ -138,3 +138,21 @@ Resources:
       LaunchConfigurationName: !Ref LaunchConfig
       MinSize: !Ref AutoScalingMinSize
       MaxSize: !Ref AutoScalingMaxSize
+      TargetGroupARNs:
+        - Ref: WebServerTargetGroup
+
+  WebServerTargetGroup:
+    Type: AWS::ElasticLoadBalancingV2::TargetGroup
+    Properties:
+      Name: !Sub ${EnvironmentName}-Web-Servers
+      HealthCheckPath: /
+      HealthCheckProtocol: HTTP
+      HealthCheckIntervalSeconds: 5
+      HealthCheckTimeoutSeconds: 3
+      HealthyThresholdCount: 2
+      UnhealthyThresholdCount: 5
+      Port: 80
+      Protocol: HTTP
+      VpcId:
+        Fn::ImportValue:
+          Fn::Sub: "${EnvironmentName}-VPCID"
